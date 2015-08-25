@@ -6,28 +6,48 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>420</width>
     <height>420</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Conway's Game of Life</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <widget class="QGraphicsView" name="graphicsView">
     <property name="geometry">
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>400</width>
-      <height>400</height>
+      <width>420</width>
+      <height>420</height>
      </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="sceneRect">
+     <rectf>
+      <x>0.000000000000000</x>
+      <y>0.000000000000000</y>
+      <width>400.000000000000000</width>
+      <height>400.000000000000000</height>
+     </rectf>
     </property>
    </widget>
   </widget>
@@ -36,14 +56,15 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>420</width>
      <height>20</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFike">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
+    <addaction name="actionStart"/>
     <addaction name="actionRestart"/>
     <addaction name="actionPause"/>
     <addaction name="actionResume"/>
@@ -52,27 +73,38 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionAbout"/>
    </widget>
-   <addaction name="menuFike"/>
+   <addaction name="menuFile"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionRestart">
    <property name="text">
     <string>Restart</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear all tiles</string>
    </property>
   </action>
   <action name="actionPause">
    <property name="text">
     <string>Pause</string>
    </property>
+   <property name="toolTip">
+    <string>Pause game</string>
+   </property>
   </action>
   <action name="actionResume">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Resume</string>
+   </property>
+   <property name="toolTip">
+    <string>Resume paused game</string>
    </property>
   </action>
   <action name="actionClose">
@@ -83,6 +115,14 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionStart">
+   <property name="text">
+    <string>Start</string>
+   </property>
+   <property name="toolTip">
+    <string>Start Game</string>
    </property>
   </action>
  </widget>
