@@ -64,10 +64,8 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="actionStart"/>
+    <addaction name="actionToggle"/>
     <addaction name="actionRestart"/>
-    <addaction name="actionPause"/>
-    <addaction name="actionResume"/>
     <addaction name="separator"/>
     <addaction name="actionClose"/>
    </widget>
@@ -88,25 +86,6 @@
     <string>Clear all tiles</string>
    </property>
   </action>
-  <action name="actionPause">
-   <property name="text">
-    <string>Pause</string>
-   </property>
-   <property name="toolTip">
-    <string>Pause game</string>
-   </property>
-  </action>
-  <action name="actionResume">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Resume</string>
-   </property>
-   <property name="toolTip">
-    <string>Resume paused game</string>
-   </property>
-  </action>
   <action name="actionClose">
    <property name="text">
     <string>Close</string>
@@ -117,9 +96,9 @@
     <string>About</string>
    </property>
   </action>
-  <action name="actionStart">
+  <action name="actionToggle">
    <property name="text">
-    <string>Start</string>
+    <string>Start / Pause</string>
    </property>
    <property name="toolTip">
     <string>Start Game</string>
