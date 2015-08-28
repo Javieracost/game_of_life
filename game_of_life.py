@@ -1,6 +1,8 @@
 #!/usr/bin/python2
 
 import sys
+from time import sleep,time
+from random import choice
 
 from PySide.QtCore import *
 from PySide.QtGui import *
@@ -12,36 +14,63 @@ class GameThread(QThread):
 		QThread.__init__(self)
 		self.scene = scene
 		self.quad = quad
+		self.setWorkingArea()
+		self.i = 0
+		self.j = 0
+
+	def setWorkingArea(self):
+		qTopLeft = { 0 : (0,0) , 1 : (201,0) , 2 : (0,201), 3: (201,201) }
+		topLeft = qTopLeft[self.quad]
+		quadArea = QRect(topLeft[0], topLeft[1], 400/2, 400/2)
+		#print "from a rect with topLeft in %d, %d that is %dx%d" % (topLeft[0], topLeft[1], 400/2, 400/2,)
+		self.cells = [item for item in self.scene.items(quadArea) if isinstance(item, QGraphicsRectItem)]
 
 	def run(self):
-		print "created thread to work quadrant: "+str(self.quad)
-		return
+		while not self.scene.finished:
+			if self.scene.running:
+				for c in self.cells:
+					self.scene.setCell(c, choice([0,1]))
+				sleep(3)
+				self.i +=1
+				#print "thread running..."+str(self.i)
+				continue
+			#self.j +=1
+			#print "thread paused..."+str(self.j)
+		print "thread finished"
+
 
 
 class Grid(QGraphicsScene):
 	def __init__(self, tileSize):
 		super(Grid, self).__init__()
 		self.started = False
+		self.finished = False
 		self.running = False
 		self.tileSize = tileSize
 		self.qpen = QPen()
 		self.dead = QBrush(Qt.white)
 		self.alive = QBrush(Qt.black)
+		self.previousCell = None
 		for pos in range(0, 410, self.tileSize):
 			self.addLine(pos, 0, pos, 400, self.qpen)
 			self.addLine(0, pos, 400, pos, self.qpen)
 		for x in range(40):
 			for y in range(40):
 				last = self.addRect(QRect(x*self.tileSize, y*self.tileSize, self.tileSize, self.tileSize), self.qpen, self.dead)
-		#test
-		last.setBrush(self.alive)
 
 	def cells(self):
 		return [item for item in self.items() if isinstance(item, QGraphicsRectItem)]
 
 	def mousePressEvent(self,e):
 		clicked = self.itemAt(e.scenePos())
-		self.toggle(clicked)
+		if isinstance(clicked, QGraphicsRectItem):
+			self.toggle(clicked)
+
+	def mouseMoveEvent(self,e):
+		selected = self.itemAt(e.scenePos())
+		if selected != self.previousCell and isinstance(selected, QGraphicsRectItem):
+			self.previousCell = selected
+			self.toggle(selected)
 
 	def toggle(self, cell):
 		newState = (1 if cell.brush() == self.dead else 0)
@@ -56,11 +85,10 @@ class Grid(QGraphicsScene):
 		for c in self.cells():
 			self.setCell(c, 0)
 		self.running = False
-		self.started = False
 		print "--Game Restarted--"
 
 	def startGame(self):
-		self.threads = [ GameThread(self, q) for q in range(4) ]
+		self.threads = [ GameThread(self, q) for q in range(1) ]
 		for t in self.threads:
 			t.start()
 		self.started = True
@@ -70,12 +98,6 @@ class Grid(QGraphicsScene):
 		print "Running status switched"
 		if not self.started:
 			self.startGame()
-		if self.running:
-			#pause code
-			print "off!"
-		else:
-			print "on!"
-			#start/resume code
 		self.running = not self.running
 		
 class Window(QMainWindow):
@@ -87,7 +109,7 @@ class Window(QMainWindow):
 		self.scene = Grid(10)
 		self.ui.graphicsView.setScene(self.scene)
 		self.ui.actionClose.setShortcut('q')
-		self.ui.actionClose.triggered.connect(qApp.quit)
+		self.ui.actionClose.triggered.connect(lambda: self.closeEvent(None))
 		self.ui.actionRestart.setShortcut('r')
 		self.ui.actionRestart.triggered.connect(self.scene.restart)
 		self.ui.actionToggle.setShortcut(' ')
@@ -99,6 +121,14 @@ class Window(QMainWindow):
 		centerPoint = QApplication.desktop().screenGeometry(screen).center()
 		frameGm.moveCenter(centerPoint)
 		self.move(frameGm.topLeft())
+
+	def closeEvent(self, e):
+		self.scene.finished = True
+		if self.scene.started:
+			for t in self.scene.threads:
+				t.wait()
+		qt_app.quit()
+
 
 qt_app = QApplication(sys.argv)
 window = Window(Ui_MainWindow())
