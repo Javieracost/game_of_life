@@ -17,6 +17,31 @@ class GameThread(QThread):
 		print "created thread to work quadrant: "+str(self.quad)
 		return
 
+
+class Grid(QGraphicsScene):
+	def __init__(self, tileSize):
+		super(Grid, self).__init__()
+		self.tileSize = tileSize
+		self.qpen = QPen()
+		self.dead = QBrush(Qt.white)
+		self.alive = QBrush(Qt.black)
+		for pos in range(0, 410, self.tileSize):
+			self.addLine(pos, 0, pos, 400, self.qpen)
+			self.addLine(0, pos, 400, pos, self.qpen)
+		for x in range(40):
+			for y in range(40):
+				last = self.addRect(QRect(x*self.tileSize, y*self.tileSize, self.tileSize, self.tileSize), self.qpen, self.dead)
+		last.setBrush(self.alive)
+
+	def mousePressEvent(self,e):
+		clicked = self.itemAt(e.scenePos())
+		#status = (self.dead if clicked.)
+
+	def setCell(self, cell, alive):
+		#cell.setBrush()
+		pass
+
+		
 class Window(QMainWindow):
 	def __init__(self,ui):
 		super(Window, self).__init__()
@@ -29,21 +54,18 @@ class Window(QMainWindow):
 		self.ui.actionRestart.triggered.connect(self.restart)
 		self.ui.actionToggle.setShortcut(' ')
 		self.ui.actionToggle.triggered.connect(self.toggleRun)
-		self.tileSize = 10
-		self.scene = QGraphicsScene(QRectF(0, 0, 400, 400))
+		self.scene = Grid(10)
 		self.ui.graphicsView.setScene(self.scene)
-		self.qpen = QPen()
-		for i in range(0, 410, self.tileSize):
-			self.scene.addLine(i, 0, i, 400, self.qpen)
-			self.scene.addLine(0, i, 400, i, self.qpen)
+
+
 		self.started = False
 		self.running = False
 		
 		#some test code
-		for i in range(10):
-			self.setCell(1, i, i)
-		self.setCell(0,1,1)
-		self.setCell(0,2,2)
+		#for i in range(10):
+		#	self.setCell(1, i, i)
+		#self.setCell(0,1,1)
+		#self.setCell(0,2,2)
 		#for i in range(10):
 		#	self.setCell(1, i, i)
 
@@ -53,19 +75,6 @@ class Window(QMainWindow):
 		centerPoint = QApplication.desktop().screenGeometry(screen).center()
 		frameGm.moveCenter(centerPoint)
 		self.move(frameGm.topLeft())
-
-	def setCell(self, alive, x, y):
-		"""Sets the cell at x,y to the given state's color"""
-		xpos = x*self.tileSize
-		ypos = y*self.tileSize
-		brush = QBrush(Qt.SolidPattern)
-		if not alive:
-			brush.setColor(Qt.white)
-		self.scene.addRect(QRect(xpos, ypos, self.tileSize, self.tileSize), self.qpen, brush)
-
-	def getCell(self, x, y):
-		"""Returns the state of the cell at x,y"""
-		return ()
 
 	def restart(self):
 		for i in range(40):
@@ -93,6 +102,7 @@ class Window(QMainWindow):
 			t.start()
 		self.started = True
 		print "Game Started!"
+
 
 
 qt_app = QApplication(sys.argv)
