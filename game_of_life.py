@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 
 import sys
-from time import sleep,time
+from time import time, clock
 from random import choice
 
 from PySide.QtCore import *
@@ -10,37 +10,24 @@ from PySide.QtGui import *
 from window import Ui_MainWindow
 
 class GameThread(QThread):
-	def __init__(self, scene, quad):
+
+	def __init__(self, scene):
 		QThread.__init__(self)
 		self.scene = scene
-		self.quad = quad
-		self.setWorkingArea()
-		self.i = 0
-		self.j = 0
-
-	def setWorkingArea(self):
-		qTopLeft = { 0 : (0,0) , 1 : (201,0) , 2 : (0,201), 3: (201,201) }
-		topLeft = qTopLeft[self.quad]
-		quadArea = QRect(topLeft[0], topLeft[1], 400/2, 400/2)
-		#print "from a rect with topLeft in %d, %d that is %dx%d" % (topLeft[0], topLeft[1], 400/2, 400/2,)
-		self.cells = [item for item in self.scene.items(quadArea) if isinstance(item, QGraphicsRectItem)]
+		self.cells = scene.cells()
+		self.lastUpdate = clock()
 
 	def run(self):
 		while not self.scene.finished:
-			if self.scene.running:
+			qApp.processEvents()
+			if self.scene.running and (clock()-self.lastUpdate) > 0.5:
 				for c in self.cells:
+					#game logic itself
 					self.scene.setCell(c, choice([0,1]))
-				sleep(3)
-				self.i +=1
-				#print "thread running..."+str(self.i)
-				continue
-			#self.j +=1
-			#print "thread paused..."+str(self.j)
-		print "thread finished"
-
-
+				self.lastUpdate = clock()
 
 class Grid(QGraphicsScene):
+
 	def __init__(self, tileSize):
 		super(Grid, self).__init__()
 		self.started = False
@@ -61,11 +48,6 @@ class Grid(QGraphicsScene):
 	def cells(self):
 		return [item for item in self.items() if isinstance(item, QGraphicsRectItem)]
 
-	def mousePressEvent(self,e):
-		clicked = self.itemAt(e.scenePos())
-		if isinstance(clicked, QGraphicsRectItem):
-			self.toggle(clicked)
-
 	def mouseMoveEvent(self,e):
 		selected = self.itemAt(e.scenePos())
 		if selected != self.previousCell and isinstance(selected, QGraphicsRectItem):
@@ -85,20 +67,22 @@ class Grid(QGraphicsScene):
 		for c in self.cells():
 			self.setCell(c, 0)
 		self.running = False
-		print "--Game Restarted--"
 
 	def startGame(self):
-		self.threads = [ GameThread(self, q) for q in range(1) ]
-		for t in self.threads:
-			t.start()
+		self.gameThread = GameThread(self)
+		self.gameThread.start()
 		self.started = True
-		print "Game Started!"
 
 	def toggleRun(self):
-		print "Running status switched"
 		if not self.started:
 			self.startGame()
 		self.running = not self.running
+
+	def quit(self):
+		self.finished = True
+		if self.started:
+				self.gameThread.wait()
+
 		
 class Window(QMainWindow):
 	def __init__(self,ui):
@@ -123,10 +107,7 @@ class Window(QMainWindow):
 		self.move(frameGm.topLeft())
 
 	def closeEvent(self, e):
-		self.scene.finished = True
-		if self.scene.started:
-			for t in self.scene.threads:
-				t.wait()
+		self.scene.quit()
 		qt_app.quit()
 
 
@@ -134,5 +115,4 @@ qt_app = QApplication(sys.argv)
 window = Window(Ui_MainWindow())
 window.center()
 window.show()
-# Run the application's event loop
 sys.exit(qt_app.exec_())
