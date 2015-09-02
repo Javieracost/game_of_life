@@ -8,22 +8,29 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 
 from window import Ui_MainWindow
+from pprint import pprint
 
 class GameThread(QThread):
 
 	def __init__(self, scene):
 		QThread.__init__(self)
 		self.scene = scene
-		self.cells = scene.cells()
 		self.lastUpdate = clock()
 
 	def run(self):
+		alive, dead = self.scene.alive, self.scene.dead
+		grid = self.scene.grid
 		while not self.scene.finished:
-			qApp.processEvents()
-			if self.scene.running and (clock()-self.lastUpdate) > 0.5:
-				for c in self.cells:
-					#game logic itself
-					self.scene.setCell(c, choice([0,1]))
+			qApp.processEvents() #probably a hack
+			if self.scene.running and (clock()-self.lastUpdate) > 0.05:
+				for i in range(len(grid)):
+					for j in range(len(grid)):
+						cell = grid[i][j]
+						cellState = cell.brush()
+						crowd = self.scene.countNeighbors(i,j)
+						if cellState == dead and crowd == 3 or \
+						cellState == alive and crowd not in range(2,4):
+							self.scene.toggle(cell)
 				self.lastUpdate = clock()
 
 class Grid(QGraphicsScene):
@@ -38,12 +45,14 @@ class Grid(QGraphicsScene):
 		self.dead = QBrush(Qt.white)
 		self.alive = QBrush(Qt.black)
 		self.previousCell = None
-		for pos in range(0, 410, self.tileSize):
-			self.addLine(pos, 0, pos, 400, self.qpen)
-			self.addLine(0, pos, 400, pos, self.qpen)
+		self.grid = []
 		for x in range(40):
+			row = []
 			for y in range(40):
-				last = self.addRect(QRect(x*self.tileSize, y*self.tileSize, self.tileSize, self.tileSize), self.qpen, self.dead)
+				xpos, ypos = [x*10, y*10]
+				row.append(self.addRect(QRect(xpos, ypos, self.tileSize, self.tileSize), self.qpen, self.dead))
+				#cell.setToolTip("coords: %d,%d"%(xpos,ypos,))
+			self.grid.append(row)
 
 	def cells(self):
 		return [item for item in self.items() if isinstance(item, QGraphicsRectItem)]
@@ -63,10 +72,24 @@ class Grid(QGraphicsScene):
 		state = (self.alive if alive else self.dead)
 		cell.setBrush(state)
 
+	def countNeighbors(self, x, y):
+		amt = 0
+		for xOff in range(-1, 2):
+			xpos = x + xOff
+			if xpos not in range(len(self.grid)): continue
+			for yOff in range(-1, 2):
+				ypos = y + yOff
+				if ypos not in range(len(self.grid)) or (x,y) == (xpos, ypos):
+					continue
+				if self.grid[xpos][ypos].brush() == self.alive:
+					amt += 1
+		return amt
+
 	def restart(self):
 		for c in self.cells():
 			self.setCell(c, 0)
 		self.running = False
+		print "Game Restarted"
 
 	def startGame(self):
 		self.gameThread = GameThread(self)
@@ -74,16 +97,18 @@ class Grid(QGraphicsScene):
 		self.started = True
 
 	def toggleRun(self):
+		state = {True: "Started", False: "Paused"}
 		if not self.started:
 			self.startGame()
 		self.running = not self.running
+		print "Game "+state[self.running]
+
 
 	def quit(self):
 		self.finished = True
 		if self.started:
 				self.gameThread.wait()
 
-		
 class Window(QMainWindow):
 	def __init__(self,ui):
 		super(Window, self).__init__()
@@ -109,7 +134,6 @@ class Window(QMainWindow):
 	def closeEvent(self, e):
 		self.scene.quit()
 		qt_app.quit()
-
 
 qt_app = QApplication(sys.argv)
 window = Window(Ui_MainWindow())
