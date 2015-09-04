@@ -58,6 +58,13 @@ class Grid(QGraphicsScene):
 	def cells(self):
 		return [item for item in self.items() if isinstance(item, QGraphicsRectItem)]
 
+	def mouseDoubleClickEvent(self,e):
+		selected = self.itemAt(e.scenePos())
+		self.toggle(selected)
+
+	def mouseReleaseEvent(self,e):
+		self.previousCell = None
+
 	def mouseMoveEvent(self,e):
 		selected = self.itemAt(e.scenePos())
 		if selected != self.previousCell and isinstance(selected, QGraphicsRectItem):
