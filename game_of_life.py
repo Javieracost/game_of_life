@@ -1,14 +1,12 @@
 #!/usr/bin/python2
 
 import sys
-from time import time, clock
-from random import choice
+from time import clock
 
 from PySide.QtCore import *
 from PySide.QtGui import *
 
 from window import Ui_MainWindow
-from pprint import pprint
 
 class GameThread(QThread):
 
@@ -20,9 +18,10 @@ class GameThread(QThread):
 	def run(self):
 		alive, dead = self.scene.alive, self.scene.dead
 		grid = self.scene.grid
+		pending = [] #cells to be updated on the next gen
 		while not self.scene.finished:
 			qApp.processEvents() #probably a hack
-			if self.scene.running and (clock()-self.lastUpdate) > 0.05:
+			if self.scene.running and (clock()-self.lastUpdate) > 0.01:
 				for i in range(len(grid)):
 					for j in range(len(grid)):
 						cell = grid[i][j]
@@ -30,7 +29,10 @@ class GameThread(QThread):
 						crowd = self.scene.countNeighbors(i,j)
 						if cellState == dead and crowd == 3 or \
 						cellState == alive and crowd not in range(2,4):
-							self.scene.toggle(cell)
+							#actual update should be done only after checking every cell
+							pending.append(grid[i][j])
+				while pending:
+					self.scene.toggle(pending.pop(0))
 				self.lastUpdate = clock()
 
 class Grid(QGraphicsScene):
@@ -51,7 +53,6 @@ class Grid(QGraphicsScene):
 			for y in range(40):
 				xpos, ypos = [x*10, y*10]
 				row.append(self.addRect(QRect(xpos, ypos, self.tileSize, self.tileSize), self.qpen, self.dead))
-				#cell.setToolTip("coords: %d,%d"%(xpos,ypos,))
 			self.grid.append(row)
 
 	def cells(self):
@@ -89,7 +90,6 @@ class Grid(QGraphicsScene):
 		for c in self.cells():
 			self.setCell(c, 0)
 		self.running = False
-		print "Game Restarted"
 
 	def startGame(self):
 		self.gameThread = GameThread(self)
@@ -97,12 +97,9 @@ class Grid(QGraphicsScene):
 		self.started = True
 
 	def toggleRun(self):
-		state = {True: "Started", False: "Paused"}
 		if not self.started:
 			self.startGame()
 		self.running = not self.running
-		print "Game "+state[self.running]
-
 
 	def quit(self):
 		self.finished = True
@@ -110,6 +107,7 @@ class Grid(QGraphicsScene):
 				self.gameThread.wait()
 
 class Window(QMainWindow):
+
 	def __init__(self,ui):
 		super(Window, self).__init__()
 		self.ui = ui
