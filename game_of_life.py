@@ -31,7 +31,7 @@ class GameThread(QThread):
 						cellState == alive and crowd not in range(2,4):
 							#actual update should be done only after checking every cell
 							pending.append(grid[i][j])
-				while pending:
+				while pending and self.scene.running:
 					self.scene.toggle(pending.pop(0))
 				self.lastUpdate = clock()
 
@@ -48,6 +48,7 @@ class Grid(QGraphicsScene):
 		self.alive = QBrush(Qt.black)
 		self.previousCell = None
 		self.grid = []
+		self.generation = 0
 		for x in range(40):
 			row = []
 			for y in range(40):
@@ -94,9 +95,9 @@ class Grid(QGraphicsScene):
 		return amt
 
 	def restart(self):
+		self.running = False
 		for c in self.cells():
 			self.setCell(c, 0)
-		self.running = False
 
 	def startGame(self):
 		self.gameThread = GameThread(self)
@@ -121,6 +122,12 @@ class Window(QMainWindow):
 		self.ui.setupUi(self)
 		self.setFixedSize(420,440)
 		self.scene = Grid(10)
+		self.statusLabel = QLabel()
+		self.statusLabel.setText("Ready!")
+		self.generationLabel = QLabel()
+		self.generationLabel.setText("Generation: ")
+		self.ui.statusBar.addPermanentWidget(self.statusLabel, 1)
+		self.ui.statusBar.addPermanentWidget(self.generationLabel, 1)
 		self.ui.graphicsView.setScene(self.scene)
 		self.ui.actionClose.setShortcut('q')
 		self.ui.actionClose.triggered.connect(lambda: self.closeEvent(None))
@@ -135,6 +142,12 @@ class Window(QMainWindow):
 		centerPoint = QApplication.desktop().screenGeometry(screen).center()
 		frameGm.moveCenter(centerPoint)
 		self.move(frameGm.topLeft())
+
+	def statusUpdate(self,newStatus):
+		self.statusLabel.setText(newStatus)
+
+	def generationUpdate(self,gen):
+		self.generationLabel.setText(str(gen))
 
 	def closeEvent(self, e):
 		self.scene.quit()

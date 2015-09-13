@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'graphic.ui'
 #
-# Created: Fri Aug 28 04:31:29 2015
+# Created: Sun Sep 13 02:33:54 2015
 #      by: pyside-uic 0.2.15 running on PySide 1.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -42,6 +42,10 @@ class Ui_MainWindow(object):
         self.menuHelp = QtGui.QMenu(self.menubar)
         self.menuHelp.setObjectName("menuHelp")
         MainWindow.setMenuBar(self.menubar)
+        self.statusBar = QtGui.QStatusBar(MainWindow)
+        self.statusBar.setSizeGripEnabled(False)
+        self.statusBar.setObjectName("statusBar")
+        MainWindow.setStatusBar(self.statusBar)
         self.actionRestart = QtGui.QAction(MainWindow)
         self.actionRestart.setObjectName("actionRestart")
         self.actionClose = QtGui.QAction(MainWindow)
