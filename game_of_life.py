@@ -7,6 +7,7 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 
 from window import Ui_MainWindow
+from about import Ui_Dialog
 
 class GameThread(QThread):
 
@@ -129,8 +130,6 @@ class Grid(QGraphicsScene):
 		self.restarted = True
 		for c in self.cells():
 			self.setCell(c, 0)
-		else:
-			print "done restarting"
 
 	def startGame(self):
 		self.gameThread.start()
@@ -166,8 +165,18 @@ class Window(QMainWindow):
 		self.ui.actionRestart.triggered.connect(self.scene.restart)
 		self.ui.actionToggle.setShortcut(' ')
 		self.ui.actionToggle.triggered.connect(self.scene.toggleRun)
+		self.ui.actionAbout.triggered.connect(self.aboutDiag)
 		self.scene.gameThread.status.updateGen.connect(self.generationUpdate)
 		self.scene.gameThread.status.updateStat.connect(self.statusUpdate)
+
+	def aboutDiag(self):
+		dialog = QDialog()
+		dialog.ui = Ui_Dialog()
+		dialog.ui.setupUi(dialog)
+		dialog.setAttribute(Qt.WA_DeleteOnClose)
+		dialog.exec_()
+
+
 
 	def center(self):
 		frameGm = self.frameGeometry()
