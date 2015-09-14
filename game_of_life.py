@@ -44,8 +44,9 @@ class GameThread(QThread):
 				lastMsg = statMsgs[self.scene.running]
 				self.status.updateS(lastMsg)
 			if self.scene.restarted:
-				self.status.updateS("Ready!")
+				pending = []
 				generation = 0
+				self.status.updateS("Ready!")
 				self.status.updateG(generation)
 				self.scene.restarted = False
 
@@ -128,6 +129,8 @@ class Grid(QGraphicsScene):
 		self.restarted = True
 		for c in self.cells():
 			self.setCell(c, 0)
+		else:
+			print "done restarting"
 
 	def startGame(self):
 		self.gameThread.start()
@@ -141,7 +144,7 @@ class Grid(QGraphicsScene):
 	def quit(self):
 		self.finished = True
 		if self.started:
-				self.gameThread.wait()
+			self.gameThread.wait()
 
 class Window(QMainWindow):
 
