@@ -14,14 +14,19 @@ class GameThread(QThread):
 		QThread.__init__(self)
 		self.scene = scene
 		self.lastUpdate = clock()
+		self.status = StatusObj()
 
 	def run(self):
 		alive, dead = self.scene.alive, self.scene.dead
 		grid = self.scene.grid
 		pending = [] #cells to be updated on the next gen
+		generation = 0
+		statMsgs = {True : "Running...", False : "Paused"}
+		lastMsg = ""
 		while not self.scene.finished:
 			qApp.processEvents() #probably a hack
 			if self.scene.running and (clock()-self.lastUpdate) > 0.01:
+				generation += 1
 				for i in range(len(grid)):
 					for j in range(len(grid)):
 						cell = grid[i][j]
@@ -34,6 +39,29 @@ class GameThread(QThread):
 				while pending and self.scene.running:
 					self.scene.toggle(pending.pop(0))
 				self.lastUpdate = clock()
+				self.status.updateG(generation)
+			if self.scene.started and lastMsg != statMsgs[self.scene.running]:
+				lastMsg = statMsgs[self.scene.running]
+				self.status.updateS(lastMsg)
+			if self.scene.restarted:
+				self.status.updateS("Ready!")
+				generation = 0
+				self.status.updateG(generation)
+				self.scene.restarted = False
+
+class StatusObj(QObject):
+
+	updateGen = Signal(int)
+	updateStat = Signal(str)
+
+	def __init__(self):
+		QObject.__init__(self)
+
+	def updateG(self, gen):
+		self.updateGen.emit(gen)
+
+	def updateS(self, newState):
+		self.updateStat.emit(newState)
 
 class Grid(QGraphicsScene):
 
@@ -42,13 +70,14 @@ class Grid(QGraphicsScene):
 		self.started = False
 		self.finished = False
 		self.running = False
+		self.restarted = False
 		self.tileSize = tileSize
 		self.qpen = QPen()
 		self.dead = QBrush(Qt.white)
 		self.alive = QBrush(Qt.black)
 		self.previousCell = None
 		self.grid = []
-		self.generation = 0
+		self.gameThread = GameThread(self)
 		for x in range(40):
 			row = []
 			for y in range(40):
@@ -96,11 +125,11 @@ class Grid(QGraphicsScene):
 
 	def restart(self):
 		self.running = False
+		self.restarted = True
 		for c in self.cells():
 			self.setCell(c, 0)
 
 	def startGame(self):
-		self.gameThread = GameThread(self)
 		self.gameThread.start()
 		self.started = True
 
@@ -120,12 +149,11 @@ class Window(QMainWindow):
 		super(Window, self).__init__()
 		self.ui = ui
 		self.ui.setupUi(self)
-		self.setFixedSize(420,440)
+		self.setFixedSize(420,460)
 		self.scene = Grid(10)
 		self.statusLabel = QLabel()
 		self.statusLabel.setText("Ready!")
 		self.generationLabel = QLabel()
-		self.generationLabel.setText("Generation: ")
 		self.ui.statusBar.addPermanentWidget(self.statusLabel, 1)
 		self.ui.statusBar.addPermanentWidget(self.generationLabel, 1)
 		self.ui.graphicsView.setScene(self.scene)
@@ -135,6 +163,8 @@ class Window(QMainWindow):
 		self.ui.actionRestart.triggered.connect(self.scene.restart)
 		self.ui.actionToggle.setShortcut(' ')
 		self.ui.actionToggle.triggered.connect(self.scene.toggleRun)
+		self.scene.gameThread.status.updateGen.connect(self.generationUpdate)
+		self.scene.gameThread.status.updateStat.connect(self.statusUpdate)
 
 	def center(self):
 		frameGm = self.frameGeometry()
@@ -143,11 +173,17 @@ class Window(QMainWindow):
 		frameGm.moveCenter(centerPoint)
 		self.move(frameGm.topLeft())
 
-	def statusUpdate(self,newStatus):
-		self.statusLabel.setText(newStatus)
+	@Slot(str)
+	def statusUpdate(self,newState):
+		self.statusLabel.setText(newState)
 
+	@Slot(int)
 	def generationUpdate(self,gen):
-		self.generationLabel.setText(str(gen))
+		txt = "Generation: " + str(gen)
+		if not gen:
+			txt = ""
+		self.generationLabel.setText(txt)
+
 
 	def closeEvent(self, e):
 		self.scene.quit()
