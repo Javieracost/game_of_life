@@ -1,7 +1,6 @@
 #!/usr/bin/python2
 
 import sys
-from time import clock
 
 from PySide.QtCore import *
 from PySide.QtGui import *
@@ -14,7 +13,6 @@ class GameThread(QThread):
 	def __init__(self, scene):
 		QThread.__init__(self)
 		self.scene = scene
-		self.lastUpdate = clock()
 		self.status = StatusObj()
 
 	def run(self):
@@ -26,7 +24,7 @@ class GameThread(QThread):
 		lastMsg = ""
 		while not self.scene.finished:
 			qApp.processEvents() #probably a hack
-			if self.scene.running and (clock()-self.lastUpdate) > 0.01:
+			if self.scene.running:
 				generation += 1
 				for i in range(len(grid)):
 					for j in range(len(grid)):
@@ -39,7 +37,6 @@ class GameThread(QThread):
 							pending.append(grid[i][j])
 				while pending and self.scene.running:
 					self.scene.toggle(pending.pop(0))
-				self.lastUpdate = clock()
 				self.status.updateG(generation)
 			if self.scene.started and lastMsg != statMsgs[self.scene.running]:
 				lastMsg = statMsgs[self.scene.running]
