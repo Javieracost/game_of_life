@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'graphic.ui'
 #
-# Created: Sun Sep 13 02:33:54 2015
+# Created: Sat Sep 26 20:38:32 2015
 #      by: pyside-uic 0.2.15 running on PySide 1.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -11,7 +11,7 @@ from PySide import QtCore, QtGui
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
+        MainWindow.setObjectName(MainWindow)
         MainWindow.resize(420, 450)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -41,6 +41,8 @@ class Ui_MainWindow(object):
         self.menuFile.setObjectName("menuFile")
         self.menuHelp = QtGui.QMenu(self.menubar)
         self.menuHelp.setObjectName("menuHelp")
+        self.menuSettings = QtGui.QMenu(self.menubar)
+        self.menuSettings.setObjectName("menuSettings")
         MainWindow.setMenuBar(self.menubar)
         self.statusBar = QtGui.QStatusBar(MainWindow)
         self.statusBar.setSizeGripEnabled(False)
@@ -54,25 +56,32 @@ class Ui_MainWindow(object):
         self.actionAbout.setObjectName("actionAbout")
         self.actionToggle = QtGui.QAction(MainWindow)
         self.actionToggle.setObjectName("actionToggle")
+        self.actionEdit = QtGui.QAction(MainWindow)
+        self.actionEdit.setObjectName("actionEdit")
         self.menuFile.addAction(self.actionToggle)
         self.menuFile.addAction(self.actionRestart)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionClose)
         self.menuHelp.addAction(self.actionAbout)
+        self.menuSettings.addAction(self.actionEdit)
         self.menubar.addAction(self.menuFile.menuAction())
+        self.menubar.addAction(self.menuSettings.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Conway\'s Game of Life", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "&Help", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRestart.setText(QtGui.QApplication.translate("MainWindow", "Restart", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRestart.setToolTip(QtGui.QApplication.translate("MainWindow", "Clear all tiles", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionClose.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionAbout.setText(QtGui.QApplication.translate("MainWindow", "About", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionToggle.setText(QtGui.QApplication.translate("MainWindow", "Start / Pause", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionToggle.setToolTip(QtGui.QApplication.translate("MainWindow", "Start Game", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(QtGui.QApplication.translate(MainWindow, "Conway\'s Game of Life", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFile.setTitle(QtGui.QApplication.translate(MainWindow, "&File", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuHelp.setTitle(QtGui.QApplication.translate(MainWindow, "&Help", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuSettings.setToolTip(QtGui.QApplication.translate(MainWindow, "Board Preferences", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuSettings.setTitle(QtGui.QApplication.translate(MainWindow, "&Settings", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRestart.setText(QtGui.QApplication.translate(MainWindow, "Restart", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRestart.setToolTip(QtGui.QApplication.translate(MainWindow, "Clear all tiles", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionClose.setText(QtGui.QApplication.translate(MainWindow, "Close", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionAbout.setText(QtGui.QApplication.translate(MainWindow, "About", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionToggle.setText(QtGui.QApplication.translate(MainWindow, "Start / Pause", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionToggle.setToolTip(QtGui.QApplication.translate(MainWindow, "Start Game", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionEdit.setText(QtGui.QApplication.translate(MainWindow, "Edit...", None, QtGui.QApplication.UnicodeUTF8))
 

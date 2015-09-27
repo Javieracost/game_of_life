@@ -6,7 +6,7 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 
 from window import Ui_MainWindow
-from about import Ui_Dialog
+from about import Ui_Dialog as aboutDialog
 
 class GameThread(QThread):
 
@@ -140,6 +140,50 @@ class Grid(QGraphicsScene):
         if self.started:
             self.gameThread.wait()
 
+    @Slot(QColor)
+    def setColor(self, newcolor):
+        self.qpen.setColor(newcolor)
+        self.alive.setColor(newcolor)
+        #probably should call for an update
+
+class EditDialog(QDialog):
+
+    updateColor = Signal(QColor)
+
+    def __init__(self, parent):
+        super(EditDialog, self).__init__(parent)
+        self.status = StatusObj()
+        self.setModal(False)
+        labelPrefs = QLabel("Preferences")
+        labelColor = QLabel("Cell Color")
+        labelSize = QLabel("Cell Size")
+        self.color = QColorDialog(parent)
+        self.color.currentColorChanged.connect(self.colorChanged)
+        self.color.setWindowFlags(Qt.Widget)
+        self.color.setOption(QColorDialog.DontUseNativeDialog)
+        self.color.setOption(QColorDialog.NoButtons)
+        topSeparator = QFrame()
+        topSeparator.setFrameShape(QFrame.HLine)
+        btmSeparator = QFrame()
+        btmSeparator.setFrameShape(QFrame.HLine)
+        size = QSlider(Qt.Horizontal)
+        closeBtn = QPushButton("Close")
+        elements = [labelPrefs, topSeparator, labelColor, self.color, btmSeparator, labelSize, size, closeBtn]
+        layout = QVBoxLayout()
+        for e in elements:
+            layout.addWidget(e)
+        self.setLayout(layout)
+        layout.setSizeConstraint(QLayout.SetFixedSize)
+        self.setSizeGripEnabled(False)
+        QObject.connect(closeBtn, SIGNAL("released()"), self.closeEvent)
+        #self.editDiag.setAttribute(Qt.WA_DeleteOnClose)
+
+    def colorChanged(self,color):
+        self.updateColor.emit(color)
+
+    def closeEvent(self, evt=None):
+        self.hide()
+
 class Window(QMainWindow):
 
     def __init__(self, ui):
@@ -148,6 +192,7 @@ class Window(QMainWindow):
         self.ui.setupUi(self)
         self.setFixedSize(420, 460)
         self.scene = Grid(10)
+        self.editDiag = EditDialog(self)
         self.statusLabel = QLabel()
         self.statusLabel.setText("Ready!")
         self.generationLabel = QLabel()
@@ -160,21 +205,28 @@ class Window(QMainWindow):
         self.ui.actionRestart.triggered.connect(self.scene.restart)
         self.ui.actionToggle.setShortcut(' ')
         self.ui.actionToggle.triggered.connect(self.scene.toggleRun)
+        self.ui.actionEdit.setShortcut('e')
+        self.ui.actionEdit.triggered.connect(self.initEditDiag)
         self.ui.actionAbout.triggered.connect(self.aboutDiag)
         self.scene.gameThread.status.updateGen.connect(self.generationUpdate)
         self.scene.gameThread.status.updateStat.connect(self.statusUpdate)
+        self.editDiag.updateColor.connect(self.scene.setColor)
+
 
     def aboutDiag(self):
-        dialog = QDialog()
-        dialog.ui = Ui_Dialog()
+        dialog = QDialog(self)
+        dialog.ui = aboutDialog()
         dialog.ui.setupUi(dialog)
         dialog.setAttribute(Qt.WA_DeleteOnClose)
         dialog.exec_()
 
+    def initEditDiag(self):
+        self.editDiag.show()
+
     def center(self):
         frameGm = self.frameGeometry()
-        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
-        centerPoint = QApplication.desktop().screenGeometry(screen).center()
+        screen = QApplication.desktop(self).screenNumber(QApplication.desktop(self).cursor().pos())
+        centerPoint = QApplication.desktop(self).screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 

@@ -67,7 +67,17 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="toolTip">
+     <string>Board Preferences</string>
+    </property>
+    <property name="title">
+     <string>&amp;Settings</string>
+    </property>
+    <addaction name="actionEdit"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuSettings"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
@@ -99,6 +109,11 @@
    </property>
    <property name="toolTip">
     <string>Start Game</string>
+   </property>
+  </action>
+  <action name="actionEdit">
+   <property name="text">
+    <string>Edit...</string>
    </property>
   </action>
  </widget>
