@@ -11,7 +11,7 @@ from PySide import QtCore, QtGui
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName(MainWindow)
+        MainWindow.setObjectName("MainWindow")
         MainWindow.resize(420, 450)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -72,16 +72,16 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate(MainWindow, "Conway\'s Game of Life", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuFile.setTitle(QtGui.QApplication.translate(MainWindow, "&File", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuHelp.setTitle(QtGui.QApplication.translate(MainWindow, "&Help", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuSettings.setToolTip(QtGui.QApplication.translate(MainWindow, "Board Preferences", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuSettings.setTitle(QtGui.QApplication.translate(MainWindow, "&Settings", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRestart.setText(QtGui.QApplication.translate(MainWindow, "Restart", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRestart.setToolTip(QtGui.QApplication.translate(MainWindow, "Clear all tiles", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionClose.setText(QtGui.QApplication.translate(MainWindow, "Close", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionAbout.setText(QtGui.QApplication.translate(MainWindow, "About", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionToggle.setText(QtGui.QApplication.translate(MainWindow, "Start / Pause", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionToggle.setToolTip(QtGui.QApplication.translate(MainWindow, "Start Game", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionEdit.setText(QtGui.QApplication.translate(MainWindow, "Edit...", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Conway\'s Game of Life", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "&Help", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuSettings.setToolTip(QtGui.QApplication.translate("MainWindow", "Board Preferences", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuSettings.setTitle(QtGui.QApplication.translate("MainWindow", "&Settings", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRestart.setText(QtGui.QApplication.translate("MainWindow", "Restart", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRestart.setToolTip(QtGui.QApplication.translate("MainWindow", "Clear all tiles", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionClose.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionAbout.setText(QtGui.QApplication.translate("MainWindow", "About", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionToggle.setText(QtGui.QApplication.translate("MainWindow", "Start / Pause", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionToggle.setToolTip(QtGui.QApplication.translate("MainWindow", "Start Game", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionEdit.setText(QtGui.QApplication.translate("MainWindow", "Edit...", None, QtGui.QApplication.UnicodeUTF8))
 

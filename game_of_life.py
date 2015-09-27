@@ -16,7 +16,6 @@ class GameThread(QThread):
         self.status = StatusObj()
 
     def run(self):
-        alive, dead = self.scene.alive, self.scene.dead
         grid = self.scene.grid
         pending = []  # cells to be updated on the next gen
         generation = 0
@@ -31,11 +30,12 @@ class GameThread(QThread):
                         cell = grid[i][j]
                         cellState = cell.brush()
                         crowd = self.scene.countNeighbors(i, j)
-                        if (cellState == dead and crowd == 3) or (cellState == alive and crowd not in range(2, 4)):
+                        if (cellState == self.scene.dead and crowd == 3) or (cellState == self.scene.alive and crowd not in range(2, 4)):
                             # actual update should be done only after checking every cell
                             pending.append(grid[i][j])
                 while pending and self.scene.running:
                     self.scene.toggle(pending.pop(0))
+                self.scene.update() # Appears to be the only way to keep de gui up to date
                 self.status.updateG(generation)
             if self.scene.started and lastMsg != statMsgs[self.scene.running]:
                 lastMsg = statMsgs[self.scene.running]
@@ -142,9 +142,11 @@ class Grid(QGraphicsScene):
 
     @Slot(QColor)
     def setColor(self, newcolor):
+        self.running = False
         self.qpen.setColor(newcolor)
         self.alive.setColor(newcolor)
-        #probably should call for an update
+        [ cell.setBrush(self.alive) for cell in self.cells() if cell.brush() != self.dead ]
+        self.running = True
 
 class EditDialog(QDialog):
 
@@ -176,7 +178,6 @@ class EditDialog(QDialog):
         layout.setSizeConstraint(QLayout.SetFixedSize)
         self.setSizeGripEnabled(False)
         QObject.connect(closeBtn, SIGNAL("released()"), self.closeEvent)
-        #self.editDiag.setAttribute(Qt.WA_DeleteOnClose)
 
     def colorChanged(self,color):
         self.updateColor.emit(color)
@@ -225,8 +226,9 @@ class Window(QMainWindow):
 
     def center(self):
         frameGm = self.frameGeometry()
-        screen = QApplication.desktop(self).screenNumber(QApplication.desktop(self).cursor().pos())
-        centerPoint = QApplication.desktop(self).screenGeometry(screen).center()
+        desktop = QApplication.desktop()
+        screen = desktop.screenNumber(desktop.cursor().pos())
+        centerPoint = desktop.screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
